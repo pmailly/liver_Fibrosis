@@ -128,18 +128,14 @@ public class Liver_fibrosis_tools {
      * @return imgOut
      */ 
     public static ClearCLBuffer clij_filter(ClearCLBuffer imgCL, String filter) {
-        ImagePlus img32 = clij2.pull(imgCL);
-        new ImageConverter(img32).convertToGray32();
-        ClearCLBuffer imgIn = clij2.push(img32);
-        ClearCLBuffer imgOut = clij2.create(imgIn);
+        // create output image of type float; actual conversion will be performed later while computing exp or log
+        ClearCLBuffer imgOut = clij2.create(imgCL.getDimensions(), clij2.Float);
         if (filter.equals("exp"))
-            clij2.exponential(imgIn, imgOut);
+            clij2.exponential(imgCL, imgOut);
         else
-            clij2.logarithm(imgIn, imgOut);    
+            clij2.logarithm(imgCL, imgOut);
         
         clij2.release(imgCL);
-        clij2.release(imgIn);
-        img32.close();
         return(imgOut);
     }
     
