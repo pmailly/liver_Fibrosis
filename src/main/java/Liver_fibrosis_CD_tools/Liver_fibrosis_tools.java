@@ -9,21 +9,16 @@ import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.Overlay;
 import ij.gui.Roi;
-import ij.gui.WaitForUserDialog;
 import ij.io.FileSaver;
-import ij.io.Opener;
 import ij.measure.Calibration;
 import ij.measure.Measurements;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ParticleAnalyzer;
-import ij.plugin.frame.RoiManager;
-import ij.process.ImageConverter;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import net.haesleinhuepf.clij.clearcl.ClearCLBuffer;
-import net.haesleinhuepf.clij.clearcl.ClearCLImage;
 import net.haesleinhuepf.clij2.CLIJ2;
 
         
@@ -265,12 +260,12 @@ public class Liver_fibrosis_tools {
         ana.measure();
         // rescale area to high resolution image
         if (zeiss)
-            tissueArea = rt.getValue("Area", 0) * imgScale * Math.pow(pixelSize, 2);
+            tissueArea = rt.getValue("Area", 0) * Math.pow(imgScale, 2);
         else
             tissueArea = rt.getValue("Area", 0);
         System.out.println("Tissue area ="+String.format("%.2f", tissueArea)+" µm2");
         if (zeiss) {
-                cal.pixelWidth = cal.pixelHeight = imgScale * Math.pow(pixelSize, 2);
+                cal.pixelWidth = cal.pixelHeight = pixelSize * Math.pow(imgScale, 2);
                 cal.setUnit("µm");
                 img.setCalibration(cal);
         }
