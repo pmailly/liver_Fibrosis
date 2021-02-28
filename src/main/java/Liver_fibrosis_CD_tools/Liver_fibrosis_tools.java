@@ -236,39 +236,17 @@ public class Liver_fibrosis_tools {
     /**
      * 
      * @param img
-     * @param imgSizeX
      * @param path
      * @return 
      */    
     
-    public static double findTissueArea(ImagePlus img, double imgScale, boolean zeiss, String path) {
-        double pixelSize = img.getCalibration().pixelWidth;
-        /* For Zeiss set image calibration to 1 pixel, pyramidal resolution is wrong 
-        * it corresponds to high reolution only
-        */
-        Calibration cal = new Calibration();
-        if (zeiss) {
-            cal.pixelWidth = 1;
-            cal.pixelHeight= 1;
-            img.setCalibration(cal);
-        }
-        
-        double tissueArea = 0;
+    public static double findTissueArea(ImagePlus img, String path) {
         ResultsTable rt = new ResultsTable();
         IJ.setAutoThreshold(img, "Default");
         Analyzer ana = new Analyzer(img, Measurements.AREA+Measurements.LIMIT, rt);
         ana.measure();
-        // rescale area to high resolution image
-        if (zeiss)
-            tissueArea = rt.getValue("Area", 0) * Math.pow(imgScale, 2);
-        else
-            tissueArea = rt.getValue("Area", 0);
+        double tissueArea = rt.getValue("Area", 0);
         System.out.println("Tissue area ="+String.format("%.2f", tissueArea)+" µm2");
-        if (zeiss) {
-                cal.pixelWidth = cal.pixelHeight = pixelSize * Math.pow(imgScale, 2);
-                cal.setUnit("µm");
-                img.setCalibration(cal);
-        }
         // Save masks
         if (saveMask) {
             IJ.run(img, "Convert to Mask", "");

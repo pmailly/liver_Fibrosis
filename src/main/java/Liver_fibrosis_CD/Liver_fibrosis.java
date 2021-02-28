@@ -11,7 +11,6 @@ import static Liver_fibrosis_CD_tools.Liver_fibrosis_tools.clij_analyse;
 import static Liver_fibrosis_CD_tools.Liver_fibrosis_tools.color_meth;
 import static Liver_fibrosis_CD_tools.Liver_fibrosis_tools.dialog;
 import static Liver_fibrosis_CD_tools.Liver_fibrosis_tools.findTissueArea;
-import static Liver_fibrosis_CD_tools.Liver_fibrosis_tools.saveMask;
 import static Liver_fibrosis_CD_tools.Liver_fibrosis_tools.tileSize;
 import ij.IJ;
 import ij.ImagePlus;
@@ -38,7 +37,6 @@ import Liver_fibrosis_CD_tools.StainMatrix;
 import ij.ImageStack;
 import ij.process.ImageConverter;
 import org.apache.commons.io.FilenameUtils;
-import ij.io.FileSaver;
 import ij.measure.Calibration;
 import ij.plugin.Duplicator;
 import ij.process.ImageStatistics;
@@ -159,9 +157,7 @@ public class Liver_fibrosis implements PlugIn {
                     /* Case Zeiss images the calibration if only correct
                     * for series 0. Resolution facteur for other series  2^series
                     */
-                    double scale = 1;
-                    if (zeiss)
-                        scale = Math.pow(2, nbSeries - 3);
+                    
                     //get lowest pyramidal resolution
                     series = nbSeries - 3;
                     reader.setSeries(series);
@@ -184,7 +180,16 @@ public class Liver_fibrosis implements PlugIn {
                     ImagePlus imgLow = BF.openImagePlus(options)[0];
                     new ImageConverter(imgLow).convertToRGB();
                     new ImageConverter(imgLow).convertToGray16();
-                    double tissueArea = findTissueArea(imgLow, scale, zeiss, outDirResults+rootName+"_Tissue_Mask.tif");
+                    // For Zeiss image image pyramidal calibration is wrong
+                    if (zeiss) {
+                        double lowPixelSizeX = cal.pixelWidth * Math.pow(2, nbSeries - 3);
+                        double lowPixelSizeY = lowPixelSizeX;
+                        Calibration lowCal = new Calibration();
+                        lowCal.pixelWidth = lowPixelSizeX;
+                        lowCal.pixelHeight = lowPixelSizeY;
+                        imgLow.setCalibration(lowCal);
+                    }
+                    double tissueArea = findTissueArea(imgLow, outDirResults+rootName+"_Tissue_Mask.tif");
                     imgLow.close();
 
                     // Find tiles dimensions
